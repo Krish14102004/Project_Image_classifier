@@ -1,28 +1,36 @@
 from flask import Flask, render_template, request
 from PIL import Image
+import os
 import pickle
 from img2vec_pytorch import Img2Vec
-import os
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-img2vec = Img2Vec()
-model = pickle.load(open('./model.p', 'rb'))
-
-UPLOAD_FOLDER = 'uploads'
+UPLOAD_FOLDER = 'static/uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+with open('./model.p', 'rb') as f:
+    model = pickle.load(f)
+
+img2vec = Img2Vec()
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
     prediction = None
+    image_url = None
+
     if request.method == 'POST':
         file = request.files['image']
-        if file:
-            img_path = os.path.join(UPLOAD_FOLDER, file.filename)
-            file.save(img_path)
-            img = Image.open(img_path).convert('RGB')
-            features = img2vec.get_vec(img)
-            prediction = model.predict([features])[0]
-    return render_template('index.html', prediction=prediction)
+        filename = secure_filename(file.filename)
+        filepath = os.path.join(UPLOAD_FOLDER, filename)
+        file.save(filepath)
+
+        img = Image.open(filepath)
+        features = img2vec.get_vec(img)
+        prediction = model.predict([features])[0]
+        image_url = '/' + filepath.replace("\\", "/")
+
+    return render_template('index.html', prediction=prediction, image_url=image_url)
 
 if __name__ == '__main__':
     app.run(debug=True)

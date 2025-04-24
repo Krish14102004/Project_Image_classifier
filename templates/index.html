@@ -1,17 +1,150 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>Image Classifier</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(120deg, #1f1c2c, #928dab, #1f1c2c);
+            background-size: 400% 400%;
+            animation: gradientFlow 15s ease infinite;
+            color: #f0f0f0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        @keyframes gradientFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            background-color: rgba(255, 255, 255, 0.08);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            animation: fadeIn 1.5s ease-out;
+            width: 90%;
+            max-width: 500px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        input[type="file"] {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #fff;
+            color: #333;
+            border: none;
+            border-radius: 8px;
+            width: 80%;
+            cursor: pointer;
+        }
+
+        input[type="submit"] {
+            margin-top: 25px;
+            padding: 12px 30px;
+            background-color: #333;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #555;
+        }
+
+        .result {
+            margin-top: 30px;
+            font-size: 1.3rem;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            border-radius: 12px;
+            animation: fadeIn 1s ease-in;
+        }
+
+        .preview {
+            margin-top: 25px;
+        }
+
+        .preview img {
+            max-width: 100%;
+            max-height: 250px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
+            transition: transform 0.5s ease;
+        }
+
+        .preview img:hover {
+            transform: scale(1.05);
+        }
+    </style>
 </head>
 <body>
-    <h1>Upload an Image to Classify</h1>
-    <form method="post" enctype="multipart/form-data">
-        <input type="file" name="image" required>
-        <input type="submit" value="Predict">
-    </form>
+    <div class="container">
+        <h1>AI Image Classifier</h1>
 
-    {% if prediction %}
-        <h2>Prediction: {{ prediction }}</h2>
-    {% endif %}
+        <div class="preview" id="preview">
+            {% if image_url %}
+                <img src="{{ image_url }}" alt="Uploaded Image">
+            {% endif %}
+        </div>
+
+        <form method="POST" enctype="multipart/form-data">
+            {% if image_url %}
+                <input type="submit" value="Predict">
+            {% endif %}
+
+            {% if prediction %}
+            <div class="result">
+                <strong>Prediction:</strong> {{ prediction }}
+            </div>
+            {% endif %}
+
+            <input type="file" name="image" id="imageInput" accept="image/*" required>
+        </form>
+    </div>
+</body>
+
+
+    <script>
+        const imageInput = document.getElementById('imageInput');
+        const preview = document.getElementById('preview');
+
+        imageInput.onchange = () => {
+            preview.innerHTML = '';
+            const file = imageInput.files[0];
+            if (file) {
+                const img = document.createElement('img');
+                img.src = URL.createObjectURL(file);
+                preview.appendChild(img);
+            }
+        };
+    </script>
 </body>
 </html>
